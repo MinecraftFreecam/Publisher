@@ -3,6 +3,7 @@ kotlin = "2.2.0"
 serialization-json = "1.10.0"
 semver = "3.0.0"
 coroutines = "1.10.2"
+clikt = "5.1.0"
 kotest = "6.1.2"
 mockk = "1.14.9"
 
@@ -11,6 +12,7 @@ kotlin-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-s
 kotlin-semver = { group = "io.github.z4kn4fein", name = "semver", version.ref = "semver" }
 kotlin-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlin-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
+clikt = { group = "com.github.ajalt.clikt", name = "clikt", version.ref = "clikt" }
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
 kotest-assertions = { group = "io.kotest", name = "kotest-assertions-core", version.ref = "kotest" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
