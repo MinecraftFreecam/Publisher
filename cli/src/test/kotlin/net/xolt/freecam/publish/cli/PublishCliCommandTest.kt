@@ -9,6 +9,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import net.xolt.freecam.publish.Publisher
 import net.xolt.freecam.publish.PublisherFactory
+import net.xolt.freecam.publish.model.GitHubConfig
 import net.xolt.freecam.test.MetadataFixtures.testMetadata
 import net.xolt.freecam.test.createTestDir
 import net.xolt.freecam.test.createTestFile
@@ -35,6 +36,7 @@ class PublishCliCommandTest {
         result.statusCode shouldBe 0
         result.output shouldContain "Usage"
         result.output shouldContain "artifacts-dir"
+        result.output shouldContain "--gh-token"
     }
 
     @Test
@@ -59,6 +61,7 @@ class PublishCliCommandTest {
             override fun create(
                 dryRun: Boolean,
                 artifactsDir: Path,
+                githubConfig: GitHubConfig,
             ): Publisher {
                 dryPublisher = dryRun
                 actualDir = artifactsDir
@@ -69,6 +72,10 @@ class PublishCliCommandTest {
         val cmd = testCommand(publisherFactory = publisherFactory)
         val result = cmd.test(listOf(
             "--dry-run",
+            "--gh-token", "token",
+            "--gh-owner", "owner",
+            "--gh-repo", "repo",
+            "--git-sha", "committish",
             "--metadata",
             metadata.toTestFile().absolutePathString(),
             dir.absolutePathString(),
@@ -97,6 +104,7 @@ class PublishCliCommandTest {
             override fun create(
                 dryRun: Boolean,
                 artifactsDir: Path,
+                githubConfig: GitHubConfig,
             ): Publisher {
                 dryPublisher = dryRun
                 actualDir = artifactsDir
@@ -109,6 +117,10 @@ class PublishCliCommandTest {
 
         val cmd = testCommand(publisherFactory = publisherFactory)
         val result = cmd.test(listOf(
+            "--gh-token", "token",
+            "--gh-owner", "owner",
+            "--gh-repo", "repo",
+            "--git-sha", "committish",
             "--metadata",
             metadata.toTestFile().absolutePathString(),
             dir.absolutePathString(),
@@ -133,6 +145,10 @@ class PublishCliCommandTest {
 
         val cmd = testCommand()
         val result = cmd.test(listOf(
+            "--gh-token", "token",
+            "--gh-owner", "owner",
+            "--gh-repo", "repo",
+            "--git-sha", "committish",
             "--metadata",
             metadata.toTestFile().absolutePathString(),
             dir.absolutePathString(),
@@ -150,6 +166,10 @@ class PublishCliCommandTest {
         val cmd = testCommand()
 
         val result = cmd.test(listOf(
+            "--gh-token", "token",
+            "--gh-owner", "owner",
+            "--gh-repo", "repo",
+            "--git-sha", "committish",
             "--metadata",
             metadata.toTestFile().absolutePathString(),
             file.absolutePathString(),
@@ -174,5 +194,6 @@ internal fun mockPublisherFactory(
     override fun create(
         dryRun: Boolean,
         artifactsDir: Path,
+        githubConfig: GitHubConfig,
     ): Publisher = mockk(relaxUnitFun = relaxUnitFun)
 }

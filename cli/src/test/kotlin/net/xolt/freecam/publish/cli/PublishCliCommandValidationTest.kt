@@ -21,6 +21,10 @@ class PublishCliCommandValidationTest {
         val cmd = testCommand()
 
         val result = cmd.test(listOf(
+            "--gh-token", "token",
+            "--gh-owner", "owner",
+            "--gh-repo", "repo",
+            "--git-sha", "committish",
             "--metadata",
             metadata.toTestFile().absolutePathString(),
             dir.absolutePathString(),
@@ -38,6 +42,10 @@ class PublishCliCommandValidationTest {
         val cmd = testCommand()
 
         val result = cmd.test(listOf(
+            "--gh-token", "token",
+            "--gh-owner", "owner",
+            "--gh-repo", "repo",
+            "--git-sha", "committish",
             "--metadata",
             metadata.toTestFile().absolutePathString(),
             file.absolutePathString(),
