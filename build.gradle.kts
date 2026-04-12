@@ -31,6 +31,18 @@ tasks {
         from("LICENSE")
     }
 
+    processResources {
+        sequenceOf(
+            "version",
+            "api_version",
+        ).associateWith { key ->
+            project.properties[key].toString()
+        }.also { buildProperties ->
+            inputs.properties(buildProperties)
+            filesMatching("build.properties") { expand(buildProperties) }
+        }
+    }
+
     check {
         // Also run subproject tests
         dependsOn(provider {

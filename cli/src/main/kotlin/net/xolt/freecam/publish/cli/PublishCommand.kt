@@ -8,7 +8,8 @@ value class PublishCommand internal constructor(
     private val cmd: PublishCliCommand
 ) {
 
-    constructor(publisherFactory: PublisherFactory) : this(PublishCliCommand(
+    constructor(version: String, publisherFactory: PublisherFactory) : this(PublishCliCommand(
+        version = version,
         publisherFactory = publisherFactory,
     ))
 
