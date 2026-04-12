@@ -11,4 +11,6 @@ dependencyResolutionManagement {
     }
 }
 
+include("api")
+
 rootProject.name = "freecam-publish"
