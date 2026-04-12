@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":core"))
     implementation(libs.clikt)
     implementation(libs.kotlin.coroutines)
+    implementation(libs.kotlin.serialization.json)
     testImplementation(libs.kotlin.test)
     testImplementation(testFixtures(project(":api")))
     testImplementation(libs.kotest.assertions)

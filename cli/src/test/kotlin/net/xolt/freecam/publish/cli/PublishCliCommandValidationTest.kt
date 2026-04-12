@@ -6,6 +6,7 @@ import io.kotest.matchers.string.shouldContain
 import kotlinx.coroutines.test.runTest
 import net.xolt.freecam.test.MetadataFixtures.testMetadata
 import net.xolt.freecam.test.createTestFile
+import net.xolt.freecam.test.toTestFile
 import kotlin.io.path.Path
 import kotlin.io.path.absolute
 import kotlin.io.path.absolutePathString
@@ -17,9 +18,13 @@ class PublishCliCommandValidationTest {
     fun `missing artifacts-dir fails validation`() = runTest {
         val metadata = testMetadata()
         val dir = Path("artifacts-dir")
-        val cmd = testCommand(metadata = metadata)
+        val cmd = testCommand()
 
-        val result = cmd.test(dir.absolutePathString())
+        val result = cmd.test(listOf(
+            "--metadata",
+            metadata.toTestFile().absolutePathString(),
+            dir.absolutePathString(),
+        ))
 
         result.statusCode shouldBe 1
         result.stderr shouldContain "\"${dir.absolute()}\" does not exist"
@@ -30,9 +35,13 @@ class PublishCliCommandValidationTest {
         val metadata = testMetadata()
 
         val file = createTestFile()
-        val cmd = testCommand(metadata = metadata)
+        val cmd = testCommand()
 
-        val result = cmd.test(file.absolutePathString())
+        val result = cmd.test(listOf(
+            "--metadata",
+            metadata.toTestFile().absolutePathString(),
+            file.absolutePathString(),
+        ))
 
         result.statusCode shouldBe 1
         result.stderr shouldContain "\"${file.absolute()}\" is a file"

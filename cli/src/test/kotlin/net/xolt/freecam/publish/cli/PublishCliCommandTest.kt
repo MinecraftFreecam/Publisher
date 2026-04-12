@@ -7,12 +7,12 @@ import io.mockk.coVerifySequence
 import io.mockk.confirmVerified
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import net.xolt.freecam.model.ReleaseMetadata
 import net.xolt.freecam.publish.Publisher
 import net.xolt.freecam.publish.PublisherFactory
 import net.xolt.freecam.test.MetadataFixtures.testMetadata
 import net.xolt.freecam.test.createTestDir
 import net.xolt.freecam.test.createTestFile
+import net.xolt.freecam.test.toTestFile
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.absolute
@@ -39,10 +39,11 @@ class PublishCliCommandTest {
 
     @Test
     fun `--version prints version and exits 0`() = runTest {
-        val cmd = testCommand()
+        val version = "1.2.3"
+        val cmd = testCommand(version = version)
         val result = cmd.test("--version")
 
-        result.output shouldContain "version ${testMetadata().modVersion}"
+        result.output shouldContain "version $version"
         result.statusCode shouldBe 0
     }
 
@@ -65,9 +66,11 @@ class PublishCliCommandTest {
             }
         }
 
-        val cmd = testCommand(metadata = metadata, publisherFactory = publisherFactory)
+        val cmd = testCommand(publisherFactory = publisherFactory)
         val result = cmd.test(listOf(
             "--dry-run",
+            "--metadata",
+            metadata.toTestFile().absolutePathString(),
             dir.absolutePathString(),
         ))
 
@@ -104,8 +107,10 @@ class PublishCliCommandTest {
         // We need a real directory or validation will fail
         val dir = createTestDir()
 
-        val cmd = testCommand(metadata = metadata, publisherFactory = publisherFactory)
+        val cmd = testCommand(publisherFactory = publisherFactory)
         val result = cmd.test(listOf(
+            "--metadata",
+            metadata.toTestFile().absolutePathString(),
             dir.absolutePathString(),
         ))
 
@@ -126,8 +131,10 @@ class PublishCliCommandTest {
 
         val dir = Path("artifacts-dir")
 
-        val cmd = testCommand(metadata = metadata)
+        val cmd = testCommand()
         val result = cmd.test(listOf(
+            "--metadata",
+            metadata.toTestFile().absolutePathString(),
             dir.absolutePathString(),
         ))
 
@@ -140,9 +147,11 @@ class PublishCliCommandTest {
         val metadata = testMetadata()
 
         val file = createTestFile()
-        val cmd = testCommand(metadata = metadata)
+        val cmd = testCommand()
 
         val result = cmd.test(listOf(
+            "--metadata",
+            metadata.toTestFile().absolutePathString(),
             file.absolutePathString(),
         ))
 
@@ -153,11 +162,9 @@ class PublishCliCommandTest {
 
 internal fun testCommand(
     version: String = "0.0.1",
-    metadata: ReleaseMetadata? = null,
     publisherFactory: PublisherFactory = mockPublisherFactory(),
 ) = PublishCliCommand(
     version = version,
-    metadataSupplier = { metadata ?: testMetadata() },
     publisherFactory = publisherFactory,
 )
 

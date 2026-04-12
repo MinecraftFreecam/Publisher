@@ -6,25 +6,25 @@ import com.github.ajalt.clikt.output.MordantHelpFormatter
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.help
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
-import com.github.ajalt.clikt.parameters.options.flag
-import com.github.ajalt.clikt.parameters.options.help
-import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.options.versionOption
+import com.github.ajalt.clikt.parameters.options.*
 import com.github.ajalt.clikt.parameters.types.path
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
 import net.xolt.freecam.model.ReleaseMetadata
 import net.xolt.freecam.publish.PublisherFactory
 import net.xolt.freecam.publish.logging.*
 import java.nio.file.Path
+import kotlin.io.path.inputStream
 
 internal class PublishCliCommand(
-    version: String? = null,
-    metadataSupplier: () -> ReleaseMetadata,
+    version: String = "0.0.1",
     publisherFactory: PublisherFactory,
 ) : SuspendingCliktCommand(name = "publish") {
 
     init {
         context {
-            versionOption(version ?: metadata.modVersion)
+            versionOption(version)
             helpFormatter = {
                 MordantHelpFormatter(
                     context = it,
@@ -43,11 +43,23 @@ internal class PublishCliCommand(
         )
     }
 
-    val metadata by lazy(metadataSupplier)
+    @OptIn(ExperimentalSerializationApi::class)
+    val metadata: ReleaseMetadata by lazy {
+        metadataPath.inputStream().use { input ->
+            Json.decodeFromStream<ReleaseMetadata>(input)
+        }
+    }
 
     val artifactsDir: Path by argument("artifacts-dir")
         .path(mustExist = true, mustBeReadable = true, canBeFile = false, canBeDir = true)
         .help("Directory containing the release artifacts")
+
+    val metadataPath: Path by option("--metadata")
+        .path(mustExist = true, mustBeReadable = true, canBeFile = true, canBeDir = false)
+        .help("Release metadata JSON file")
+        .defaultLazy(defaultForHelp = "[artifacts-dir]/release-metadata.json") {
+            artifactsDir.resolve("release-metadata.json")
+        }
 
     val dryRun: Boolean by option("--dry-run").flag()
         .help("Perform a dry run without making any actual API calls")
