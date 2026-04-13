@@ -1,0 +1,132 @@
+name: Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Ref to publish
+        type: string
+        required: false
+      artifact_run:
+        description: Workflow that has artifacts to release (Run ID)
+        type: string
+        required: true
+      artifact_glob:
+        description: Artifacts to release
+        type: string
+        required: false
+      dry_run:
+        description: Run in test mode
+        type: boolean
+        default: false
+      force:
+        description: Force release even if the tag is already released
+        type: boolean
+        default: false
+
+  workflow_call:
+    inputs:
+      ref:
+        description: Ref to publish
+        type: string
+        default: ${{ github.sha }}
+      artifact_glob:
+        description: Artifacts to release
+        type: string
+        required: false
+      dry_run:
+        description: Run in test mode
+        type: boolean
+        default: false
+      force:
+        description: Force release even if the tag is already released
+        type: boolean
+        default: false
+    outputs: {}
+    secrets: {}
+
+# Group workflow runs by ref and whether they affect actual releases.
+# New runs cancel any pending run.
+concurrency:
+  group: publish-${{ inputs.dry_run }}-${{ inputs.ref || github.ref }}
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  release:
+    name: ${{ inputs.dry_run && 'dry run' || 'Release' }}
+    runs-on: ubuntu-slim
+    timeout-minutes: 30
+
+    permissions:
+      # Grant 'write' to create releases.
+      contents: write
+
+    steps:
+      - name: Checkout CI files
+        uses: actions/checkout@v6
+        with:
+          sparse-checkout: .github/actions
+          sparse-checkout-cone-mode: false
+
+      - name: Checkout version file
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          sparse-checkout: gradle.properties
+          sparse-checkout-cone-mode: false
+
+      - name: Resolve version
+        id: version
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { readFileSync } = require('fs')
+
+            const text = readFileSync('gradle.properties', 'utf8')
+            const match = text.match(/^version\s*=\s*(.+)$/m)
+            if (match) core.setOutput("version", match[1].trim())
+            else core.setFailed('no version in gradle.properties')
+
+      - name: Check whether this version is released
+        id: check_release
+        uses: ./.github/actions/check-release
+        with:
+          tag: v${{ steps.version.outputs.version }}
+
+      - name: Download artifacts
+        if: inputs.force || steps.check_release.outputs.released != 'true'
+        uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+          pattern: ${{ inputs.artifact_glob || '*' }}
+          run-id: ${{ inputs.artifact_run || github.run_id }}
+          merge-multiple: true
+
+      - name: Publish release
+        if: inputs.force || steps.check_release.outputs.released != 'true'
+        env:
+          dry_run: ${{ inputs.dry_run || '' }}
+          version: ${{ steps.version.outputs.version }}
+          ref: ${{ inputs.ref || github.ref }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          shopt -s nullglob
+
+          run() {
+            if [ -n "$dry_run" ]; then
+              echo "Dry run:"
+              echo "$*"
+            else
+              "$@"
+            fi
+          }
+
+          run gh --repo "$GITHUB_REPOSITORY" \
+            release create "v$version" \
+            --target "$ref" \
+            artifacts/*

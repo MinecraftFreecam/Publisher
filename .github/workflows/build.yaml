@@ -78,3 +78,15 @@ jobs:
           path: build/distributions/*.tar
           archive: false
           if-no-files-found: error
+
+  publish:
+    name: Publish
+    uses: ./.github/workflows/publish.yaml
+    needs:
+      - api
+      - publisher
+    permissions:
+      contents: write
+    with:
+      dry_run: ${{ github.event_name != 'push' }}
+      force: ${{ github.event_name != 'push' }}
