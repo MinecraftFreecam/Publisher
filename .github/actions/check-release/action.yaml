@@ -1,0 +1,37 @@
+name: Check release
+description: Check whether a release with the given tag exists on this repository.
+
+inputs:
+  tag:
+    description: The tag to check for release, e.g. "1.2.3"
+    required: true
+
+outputs:
+  released:
+    description: Set to 'true' when the tag is already released
+    value: ${{ steps.released.outputs.released }}
+  published_at:
+    description: When the release was published in ISO 8601 format, or empty if not released
+    value: ${{ steps.released.outputs.published_at }}
+
+runs:
+  using: composite
+  steps:
+    - id: released
+      uses: actions/github-script@v8
+      with:
+        script: |
+          const { owner, repo } = context.repo
+          const tag = core.getInput("tag").trim()
+
+          try {
+            const { data } = await github.rest.repos.getReleaseByTag({ owner, repo, tag })
+            core.notice(`${tag} already published (${data.published_at})`)
+            core.setOutput("released", "true")
+            core.setOutput("published_at", data.published_at)
+          } catch (err) {
+            if (err.status !== 404) throw err
+            core.notice(`${tag} not published`)
+            core.setOutput("released", "")
+            core.setOutput("published_at", "")
+          }
