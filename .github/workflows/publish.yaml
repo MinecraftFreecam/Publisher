@@ -120,7 +120,8 @@ jobs:
           run() {
             if [ -n "$dry_run" ]; then
               echo "Dry run:"
-              echo "$*"
+              printf ' %q' "$@"
+              echo
             else
               "$@"
             fi
