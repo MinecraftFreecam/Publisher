@@ -19,10 +19,12 @@ runs:
   steps:
     - id: released
       uses: actions/github-script@v8
+      env:
+        TAG: ${{ inputs.tag }}
       with:
         script: |
           const { owner, repo } = context.repo
-          const tag = core.getInput("tag").trim()
+          const tag = process.env.TAG.trim()
 
           try {
             const { data } = await github.rest.repos.getReleaseByTag({ owner, repo, tag })
