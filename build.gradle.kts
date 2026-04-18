@@ -17,7 +17,6 @@ kotlin {
 dependencies {
     implementation(project(":core"))
     implementation(project(":cli"))
-    implementation(project(":platforms"))
     implementation(libs.kotlin.coroutines)
     testImplementation(libs.kotlin.test)
     testImplementation(testFixtures(project(":api")))
