@@ -8,7 +8,7 @@ clikt = "5.1.0"
 kotest = "6.1.2"
 mockk = "1.14.9"
 curse4j = "1.0.13"
-modrinth4j = "2.2.0"
+modrinth4j = "da95ff1ea9130d1d0729ac58b58f758170a7abc0" # 2024-01-05
 
 [libraries]
 slf4j-api = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
@@ -21,7 +21,8 @@ kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.re
 kotest-assertions = { group = "io.kotest", name = "kotest-assertions-core", version.ref = "kotest" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 curseforge-upload = { group = "me.hypherionmc.modutils", name = "CurseUpload4j", version.ref = "curse4j" }
-modrinth = { group = "dev.masecla", name = "Modrinth4J", version.ref = "modrinth4j" }
+# maven central group: dev.masecla
+modrinth = { group = "com.github.masecla22", name = "Modrinth4J", version.ref = "modrinth4j" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

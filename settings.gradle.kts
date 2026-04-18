@@ -8,6 +8,14 @@ dependencyResolutionManagement {
     repositories {
         exclusiveContent {
             forRepository {
+                maven("https://jitpack.io") { name = "JitPack" }
+            }
+            filter {
+                includeModule("com.github.masecla22", "Modrinth4J")
+            }
+        }
+        exclusiveContent {
+            forRepository {
                 maven("https://maven.firstdark.dev/releases") { name = "First Dark Development" }
             }
             filter {
