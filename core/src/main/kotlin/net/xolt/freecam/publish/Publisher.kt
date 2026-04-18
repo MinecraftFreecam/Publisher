@@ -1,6 +1,7 @@
 package net.xolt.freecam.publish
 
 import net.xolt.freecam.model.ReleaseMetadata
+import net.xolt.freecam.publish.model.CurseForgeConfig
 import java.nio.file.Path
 
 fun interface Publisher {
@@ -12,10 +13,12 @@ fun interface PublisherFactory {
     fun create(
         dryRun: Boolean,
         artifactsDir: Path,
+        curseforgeConfig: CurseForgeConfig,
     ): Publisher
 
     operator fun invoke(
         dryRun: Boolean,
         artifactsDir: Path,
-    ) = create(dryRun, artifactsDir)
+        curseforgeConfig: CurseForgeConfig,
+    ) = create(dryRun, artifactsDir, curseforgeConfig)
 }

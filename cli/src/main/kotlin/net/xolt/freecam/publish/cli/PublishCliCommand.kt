@@ -14,6 +14,7 @@ import kotlinx.serialization.json.decodeFromStream
 import net.xolt.freecam.model.ReleaseMetadata
 import net.xolt.freecam.publish.PublisherFactory
 import net.xolt.freecam.publish.logging.*
+import net.xolt.freecam.publish.model.CurseForgeConfig
 import java.nio.file.Path
 import kotlin.io.path.inputStream
 
@@ -40,6 +41,7 @@ internal class PublishCliCommand(
         publisherFactory(
             dryRun = dryRun,
             artifactsDir = artifactsDir,
+            curseforgeConfig = curseforge,
         )
     }
 
@@ -63,6 +65,8 @@ internal class PublishCliCommand(
 
     val dryRun: Boolean by option("--dry-run").flag()
         .help("Perform a dry run without making any actual API calls")
+
+    val curseforge: CurseForgeConfig by CurseForgeOptionGroup { metadata }
 
     private val verbosity by VerbosityOptionGroup()
     val logLevel: LogLevel get() = verbosity.level
