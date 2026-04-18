@@ -31,7 +31,8 @@ include(
     "api",
     "core",
     "cli",
-    "curseforge"
+    "curseforge",
+    "modrinth",
 )
 
 rootProject.name = "freecam-publish"
