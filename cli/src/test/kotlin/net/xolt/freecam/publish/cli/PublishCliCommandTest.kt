@@ -55,15 +55,10 @@ class PublishCliCommandTest {
         var actualDir: Path? = null
 
         val publisher = mockk<Publisher>(relaxUnitFun = true)
-        val publisherFactory = object : PublisherFactory {
-            override fun create(
-                dryRun: Boolean,
-                artifactsDir: Path,
-            ): Publisher {
-                dryPublisher = dryRun
-                actualDir = artifactsDir
-                return publisher
-            }
+        val publisherFactory = PublisherFactory { dryRun, artifactsDir ->
+            dryPublisher = dryRun
+            actualDir = artifactsDir
+            publisher
         }
 
         val cmd = testCommand(publisherFactory = publisherFactory)
@@ -93,15 +88,10 @@ class PublishCliCommandTest {
         var actualDir: Path? = null
 
         val publisher = mockk<Publisher>(relaxUnitFun = true)
-        val publisherFactory = object : PublisherFactory {
-            override fun create(
-                dryRun: Boolean,
-                artifactsDir: Path,
-            ): Publisher {
-                dryPublisher = dryRun
-                actualDir = artifactsDir
-                return publisher
-            }
+        val publisherFactory = PublisherFactory { dryRun, artifactsDir ->
+            dryPublisher = dryRun
+            actualDir = artifactsDir
+            publisher
         }
 
         // We need a real directory or validation will fail
@@ -170,9 +160,6 @@ internal fun testCommand(
 
 internal fun mockPublisherFactory(
     relaxUnitFun: Boolean = false,
-) = object : PublisherFactory {
-    override fun create(
-        dryRun: Boolean,
-        artifactsDir: Path,
-    ): Publisher = mockk(relaxUnitFun = relaxUnitFun)
+) = PublisherFactory { _, _ ->
+    mockk(relaxUnitFun = relaxUnitFun)
 }

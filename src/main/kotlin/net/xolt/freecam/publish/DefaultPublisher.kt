@@ -8,11 +8,8 @@ import java.nio.file.Path
 import kotlin.io.path.exists
 import kotlin.io.path.pathString
 
-object DefaultPublisherFactory: PublisherFactory {
-    override fun create(
-        dryRun: Boolean,
-        artifactsDir: Path
-    ): Publisher = DefaultPublisher(
+val DefaultPublisherFactory = PublisherFactory { dryRun, artifactsDir ->
+    DefaultPublisher(
         artifactsDir = artifactsDir,
     )
 }

@@ -7,7 +7,7 @@ interface Publisher : AutoCloseable {
     suspend fun publish(metadata: ReleaseMetadata)
 }
 
-interface PublisherFactory {
+fun interface PublisherFactory {
     fun create(
         dryRun: Boolean,
         artifactsDir: Path,
