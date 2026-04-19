@@ -5,6 +5,7 @@ import net.xolt.freecam.model.Relationship
 import java.nio.file.Path
 import java.security.MessageDigest
 import kotlin.io.path.inputStream
+import kotlin.io.path.name
 
 data class ReleaseArtifact(
     val displayName: String,
@@ -15,6 +16,8 @@ data class ReleaseArtifact(
     val relationships: List<Relationship>,
     val artifact: Path,
 ) {
+    val name get() = artifact.name
+
     val size: Long by lazy {
         artifact.toFile().length()
     }
