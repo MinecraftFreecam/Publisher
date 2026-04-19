@@ -3,13 +3,8 @@ package net.xolt.freecam.test
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToStream
-import net.xolt.freecam.model.Platforms
-import net.xolt.freecam.model.ProjectReleaseMetadata
-import net.xolt.freecam.model.ReleaseMetadata
-import net.xolt.freecam.model.ReleaseType
-import java.io.File
+import net.xolt.freecam.model.*
 import java.nio.file.Path
-import kotlin.io.path.bufferedWriter
 import kotlin.io.path.outputStream
 
 object MetadataFixtures {
@@ -33,6 +28,26 @@ object MetadataFixtures {
             curseforge = Platforms.Curseforge(curseforgeId),
         ),
         versions = versions,
+    )
+
+    fun testProjectMetadata(
+        displayName: String = "Fake Project",
+        environments: List<Environment> = listOf(Environment.CLIENT),
+        loader: String = "fabric",
+        minecraft: String = "26.1",
+        filename: String = "a.jar",
+        gameVersions: List<String> = emptyList(),
+        javaVersions: List<String> = emptyList(),
+        relationships: List<Relationship> = emptyList(),
+    ) = ProjectReleaseMetadata(
+        displayName = displayName,
+        environments = environments,
+        loader = loader,
+        minecraft = minecraft,
+        filename = filename,
+        gameVersions = gameVersions,
+        javaVersions = javaVersions,
+        relationships = relationships,
     )
 }
 
