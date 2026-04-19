@@ -7,6 +7,7 @@ import java.security.MessageDigest
 import kotlin.io.path.inputStream
 
 data class ReleaseArtifact(
+    val displayName: String,
     val loader: String,
     val minecraftVersion: String,
     val gameVersions: List<String>,
@@ -38,6 +39,7 @@ fun ReleaseArtifact.Companion.from(
     metadata: ProjectReleaseMetadata,
     artifactSupplier: (String) -> Path,
 ) = ReleaseArtifact(
+    displayName = metadata.displayName,
     loader = metadata.loader,
     minecraftVersion = metadata.minecraft,
     gameVersions = metadata.gameVersions,
