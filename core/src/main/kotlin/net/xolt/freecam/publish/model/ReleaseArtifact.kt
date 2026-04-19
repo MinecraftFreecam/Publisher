@@ -1,7 +1,8 @@
 package net.xolt.freecam.publish.model
 
-import net.xolt.freecam.model.ProjectReleaseMetadata
 import net.xolt.freecam.model.Relationship
+import net.xolt.freecam.model.ReleaseMetadata
+import net.xolt.freecam.model.ReleaseType
 import java.nio.file.Path
 import java.security.MessageDigest
 import kotlin.io.path.inputStream
@@ -9,8 +10,11 @@ import kotlin.io.path.name
 
 data class ReleaseArtifact(
     val displayName: String,
+    val version: String,
+    val versionType: ReleaseType,
+    val changelog: String,
     val loader: String,
-    val minecraftVersion: String,
+    val gameVersion: String,
     val gameVersions: Set<String>,
     val javaVersions: Set<String>,
     val relationships: Set<Relationship>,
@@ -34,22 +38,24 @@ data class ReleaseArtifact(
         }
         digest.digest()
     }
-
-    companion object
 }
 
-fun ReleaseArtifact.Companion.from(
-    metadata: ProjectReleaseMetadata,
-    artifactSupplier: (String) -> Path,
-) = ReleaseArtifact(
-    displayName = metadata.displayName,
-    loader = metadata.loader,
-    minecraftVersion = metadata.minecraft,
-    gameVersions = metadata.gameVersions.toSet(),
-    javaVersions = metadata.javaVersions.toSet(),
-    relationships = metadata.relationships.toSet(),
-    artifact = artifactSupplier(metadata.filename),
-)
-
-fun Path.resolveArtifact(metadata: ProjectReleaseMetadata) =
-    ReleaseArtifact.from(metadata, ::resolve)
+fun ReleaseMetadata.resolveArtifacts(artifactsDir: Path): List<ReleaseArtifact>
+    = versions
+    .asSequence()
+    .sorted()
+    .map {
+        ReleaseArtifact(
+            displayName = it.displayName,
+            version = modVersion,
+            versionType = releaseType,
+            changelog = changelog,
+            loader = it.loader,
+            gameVersion = it.minecraft,
+            gameVersions = it.gameVersions.toSet(),
+            javaVersions = it.javaVersions.toSet(),
+            relationships = it.relationships.toSet(),
+            artifact = artifactsDir.resolve(it.filename),
+        )
+    }
+    .toList()

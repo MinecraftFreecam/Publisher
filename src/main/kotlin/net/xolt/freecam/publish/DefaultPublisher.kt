@@ -1,9 +1,8 @@
 package net.xolt.freecam.publish
 
-import net.xolt.freecam.model.ProjectReleaseMetadata
 import net.xolt.freecam.model.ReleaseMetadata
 import net.xolt.freecam.publish.model.ReleaseArtifact
-import net.xolt.freecam.publish.model.resolveArtifact
+import net.xolt.freecam.publish.model.resolveArtifacts
 import java.nio.file.Path
 import kotlin.io.path.exists
 import kotlin.io.path.pathString
@@ -19,17 +18,10 @@ data class DefaultPublisher(
 ) : AutoCloseable, Publisher {
 
     override suspend fun publish(metadata: ReleaseMetadata) {
-        val artifacts = artifactsDir.resolveArtifacts(metadata.versions).apply {
+        val artifacts = metadata.resolveArtifacts(artifactsDir).apply {
             verifyExists()
         }
     }
-
-    private fun Path.resolveArtifacts(metadata: List<ProjectReleaseMetadata>): List<ReleaseArtifact> =
-        metadata
-            .asSequence()
-            .sorted()
-            .map(::resolveArtifact)
-            .toList()
 
     private fun List<ReleaseArtifact>.verifyExists() {
         filterNot { it.artifact.exists() }
