@@ -1,5 +1,6 @@
 package net.xolt.freecam.publish.model
 
+import net.xolt.freecam.model.Environment
 import net.xolt.freecam.model.Relationship
 import net.xolt.freecam.model.ReleaseMetadata
 import net.xolt.freecam.model.ReleaseType
@@ -13,7 +14,8 @@ data class ReleaseArtifact(
     val version: String,
     val versionType: ReleaseType,
     val changelog: String,
-    val loader: String,
+    val environments: Set<Environment>,
+    val loaders: Set<String>,
     val gameVersion: String,
     val gameVersions: Set<String>,
     val javaVersions: Set<String>,
@@ -50,7 +52,8 @@ fun ReleaseMetadata.resolveArtifacts(artifactsDir: Path): List<ReleaseArtifact>
             version = modVersion,
             versionType = releaseType,
             changelog = changelog,
-            loader = it.loader,
+            environments = it.environments.toSet(),
+            loaders = setOf(it.loader),
             gameVersion = it.minecraft,
             gameVersions = it.gameVersions.toSet(),
             javaVersions = it.javaVersions.toSet(),
