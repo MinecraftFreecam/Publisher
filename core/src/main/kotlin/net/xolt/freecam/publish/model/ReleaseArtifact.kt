@@ -11,9 +11,9 @@ data class ReleaseArtifact(
     val displayName: String,
     val loader: String,
     val minecraftVersion: String,
-    val gameVersions: List<String>,
-    val javaVersions: List<String>,
-    val relationships: List<Relationship>,
+    val gameVersions: Set<String>,
+    val javaVersions: Set<String>,
+    val relationships: Set<Relationship>,
     val artifact: Path,
 ) {
     val name get() = artifact.name
@@ -45,9 +45,9 @@ fun ReleaseArtifact.Companion.from(
     displayName = metadata.displayName,
     loader = metadata.loader,
     minecraftVersion = metadata.minecraft,
-    gameVersions = metadata.gameVersions,
-    javaVersions = metadata.javaVersions,
-    relationships = metadata.relationships,
+    gameVersions = metadata.gameVersions.toSet(),
+    javaVersions = metadata.javaVersions.toSet(),
+    relationships = metadata.relationships.toSet(),
     artifact = artifactSupplier(metadata.filename),
 )
 
