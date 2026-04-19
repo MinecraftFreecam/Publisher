@@ -4,9 +4,8 @@ import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.matchers.string.shouldContainOnlyOnce
 import kotlinx.coroutines.test.runTest
-import net.xolt.freecam.model.ProjectReleaseMetadata
-import net.xolt.freecam.model.Relationship
 import net.xolt.freecam.test.MetadataFixtures.testMetadata
+import net.xolt.freecam.test.MetadataFixtures.testProjectMetadata
 import net.xolt.freecam.test.createTestDir
 import java.nio.file.Path
 import kotlin.io.path.createFile
@@ -15,12 +14,9 @@ import kotlin.test.Test
 
 class DefaultPublisherTest {
 
-    private val testVersions = listOf(
-        testProjectReleaseMetadata(filename = "a"),
-        testProjectReleaseMetadata(filename = "b"),
-        testProjectReleaseMetadata(filename = "c"),
-        testProjectReleaseMetadata(filename = "d"),
-    )
+    private val testVersions = listOf("a", "b", "c", "d").map {
+        testProjectMetadata(filename = it)
+    }
 
     @Test
     fun `publisher calls each platform with all artifacts`() = runTest {
@@ -53,21 +49,3 @@ class DefaultPublisherTest {
         }
     }
 }
-
-private fun testProjectReleaseMetadata(
-    displayName: String = "test-release",
-    loader: String = "fabric",
-    minecraft: String = "26.1",
-    filename: String = "file.jar",
-    gameVersions: List<String> = emptyList(),
-    javaVersions: List<String> = emptyList(),
-    relationships: List<Relationship> = emptyList(),
-) = ProjectReleaseMetadata(
-    displayName = displayName,
-    loader = loader,
-    minecraft = minecraft,
-    filename = filename,
-    gameVersions = gameVersions,
-    javaVersions = javaVersions,
-    relationships = relationships,
-)

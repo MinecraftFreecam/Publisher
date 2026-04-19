@@ -1,6 +1,7 @@
 package net.xolt.freecam.model
 
 import io.kotest.matchers.collections.shouldContainExactly
+import net.xolt.freecam.test.MetadataFixtures.testProjectMetadata
 import kotlin.test.Test
 
 class ProjectReleaseMetadataVersionTest {
@@ -18,7 +19,7 @@ class ProjectReleaseMetadataVersionTest {
             "26.1-snapshot-11",
             "26.1.1",
             "26.1.1-snapshot-3",
-        ).map { metadata(minecraft = it) }
+        ).map { testProjectMetadata(minecraft = it) }
 
         val sorted = items.sorted()
 
@@ -39,8 +40,8 @@ class ProjectReleaseMetadataVersionTest {
     @Test
     fun `loader is used as secondary sort key`() {
         val items = listOf(
-            metadata(minecraft = "1.21.11", loader = "forge"),
-            metadata(minecraft = "1.21.11", loader = "fabric"),
+            testProjectMetadata(minecraft = "1.21.11", loader = "forge"),
+            testProjectMetadata(minecraft = "1.21.11", loader = "fabric"),
         )
 
         val sorted = items.sorted()
@@ -51,8 +52,8 @@ class ProjectReleaseMetadataVersionTest {
     @Test
     fun `filename is used as tertiary sort key`() {
         val items = listOf(
-            metadata(minecraft = "1.21.11", loader = "fabric", filename = "b.jar"),
-            metadata(minecraft = "1.21.11", loader = "fabric", filename = "a.jar"),
+            testProjectMetadata(minecraft = "1.21.11", loader = "fabric", filename = "b.jar"),
+            testProjectMetadata(minecraft = "1.21.11", loader = "fabric", filename = "a.jar"),
         )
 
         val sorted = items.sorted()
@@ -63,9 +64,9 @@ class ProjectReleaseMetadataVersionTest {
     @Test
     fun `sorts by version then loader then filename together`() {
         val items = listOf(
-            metadata(minecraft = "1.21.11", loader = "forge", filename = "b.jar"),
-            metadata(minecraft = "1.21.11", loader = "fabric", filename = "b.jar"),
-            metadata(minecraft = "1.21.11", loader = "fabric", filename = "a.jar"),
+            testProjectMetadata(minecraft = "1.21.11", loader = "forge", filename = "b.jar"),
+            testProjectMetadata(minecraft = "1.21.11", loader = "fabric", filename = "b.jar"),
+            testProjectMetadata(minecraft = "1.21.11", loader = "fabric", filename = "a.jar"),
         )
 
         val sorted = items.sorted()
@@ -77,21 +78,3 @@ class ProjectReleaseMetadataVersionTest {
         )
     }
 }
-
-private fun metadata(
-    displayName: String = "test-release",
-    loader: String = "fabric",
-    minecraft: String = "26.1",
-    filename: String = "file.jar",
-    gameVersions: List<String> = emptyList(),
-    javaVersions: List<String> = emptyList(),
-    relationships: List<Relationship> = emptyList(),
-) = ProjectReleaseMetadata(
-    displayName = displayName,
-    loader = loader,
-    minecraft = minecraft,
-    filename = filename,
-    gameVersions = gameVersions,
-    javaVersions = javaVersions,
-    relationships = relationships,
-)
