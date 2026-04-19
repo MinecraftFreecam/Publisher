@@ -61,7 +61,7 @@ data class Platforms(
 ) {
     @Serializable
     data class Curseforge(
-        @SerialName("project_id") val id: String
+        @SerialName("project_id") val id: ULong
     )
 
     @Serializable

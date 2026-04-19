@@ -15,7 +15,7 @@ object MetadataFixtures {
         changelog: String = "Changelog",
         githubTag: String = "v0.1.0",
         modrinthId: String = "id",
-        curseforgeId: String = "id",
+        curseforgeId: ULong = 1234UL,
         versions: List<ProjectReleaseMetadata> = emptyList(),
     ) = ReleaseMetadata(
         modVersion = modVersion,
