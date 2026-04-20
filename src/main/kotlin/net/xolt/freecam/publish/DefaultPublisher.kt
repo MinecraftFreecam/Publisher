@@ -3,24 +3,29 @@ package net.xolt.freecam.publish
 import net.xolt.freecam.model.ReleaseMetadata
 import net.xolt.freecam.publish.model.ReleaseArtifact
 import net.xolt.freecam.publish.model.resolveArtifacts
+import net.xolt.freecam.publish.platforms.CurseForgePlatform
+import net.xolt.freecam.publish.platforms.create
 import java.nio.file.Path
 import kotlin.io.path.exists
 import kotlin.io.path.pathString
 
-val DefaultPublisherFactory = PublisherFactory { dryRun, artifactsDir ->
+val DefaultPublisherFactory = PublisherFactory { dryRun, artifactsDir, curseforgeConfig ->
     DefaultPublisher(
         artifactsDir = artifactsDir,
+        curseforge = CurseForgePlatform.create(dryRun, curseforgeConfig),
     )
 }
 
 data class DefaultPublisher(
     val artifactsDir: Path,
+    val curseforge: CurseForgePlatform,
 ) : Publisher {
 
     override suspend fun publish(metadata: ReleaseMetadata) {
         val artifacts = metadata.resolveArtifacts(artifactsDir).apply {
             verifyExists()
         }
+        curseforge.publishRelease(metadata, artifacts)
     }
 
     private fun List<ReleaseArtifact>.verifyExists() {
