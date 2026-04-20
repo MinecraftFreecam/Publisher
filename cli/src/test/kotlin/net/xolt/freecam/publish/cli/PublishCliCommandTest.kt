@@ -55,7 +55,7 @@ class PublishCliCommandTest {
         var actualDir: Path? = null
 
         val publisher = mockk<Publisher>(relaxUnitFun = true)
-        val publisherFactory = PublisherFactory { dryRun, artifactsDir, _ ->
+        val publisherFactory = PublisherFactory { dryRun, artifactsDir, _, _ ->
             dryPublisher = dryRun
             actualDir = artifactsDir
             publisher
@@ -65,6 +65,7 @@ class PublishCliCommandTest {
         val result = cmd.test(listOf(
             "--dry-run",
             "--curseforge-token", "token",
+            "--modrinth-token", "token",
             "--metadata",
             metadata.toTestFile().absolutePathString(),
             dir.absolutePathString(),
@@ -86,7 +87,7 @@ class PublishCliCommandTest {
         var actualDir: Path? = null
 
         val publisher = mockk<Publisher>(relaxUnitFun = true)
-        val publisherFactory = PublisherFactory { dryRun, artifactsDir, _ ->
+        val publisherFactory = PublisherFactory { dryRun, artifactsDir, _, _ ->
             dryPublisher = dryRun
             actualDir = artifactsDir
             publisher
@@ -98,6 +99,7 @@ class PublishCliCommandTest {
         val cmd = testCommand(publisherFactory = publisherFactory)
         val result = cmd.test(listOf(
             "--curseforge-token", "token",
+            "--modrinth-token", "token",
             "--metadata",
             metadata.toTestFile().absolutePathString(),
             dir.absolutePathString(),
@@ -156,6 +158,6 @@ internal fun testCommand(
 
 internal fun mockPublisherFactory(
     relaxUnitFun: Boolean = false,
-) = PublisherFactory { _, _, _ ->
+) = PublisherFactory { _, _, _, _ ->
     mockk(relaxUnitFun = relaxUnitFun)
 }

@@ -9,6 +9,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import net.xolt.freecam.publish.model.ReleaseArtifact
 import net.xolt.freecam.publish.platforms.CurseForgePlatform
+import net.xolt.freecam.publish.platforms.ModrinthPlatform
 import net.xolt.freecam.test.MetadataFixtures.testMetadata
 import net.xolt.freecam.test.MetadataFixtures.testProjectMetadata
 import net.xolt.freecam.test.createTestDir
@@ -26,6 +27,7 @@ class DefaultPublisherTest {
     @Test
     fun `publisher calls each platform with all artifacts`() = runTest {
         val curseforge = mockk<CurseForgePlatform>(relaxUnitFun = true)
+        val modrinth = mockk<ModrinthPlatform>(relaxUnitFun = true)
 
         val dir = createTestDir()
         val metadata = testMetadata(versions = testVersions)
@@ -33,22 +35,24 @@ class DefaultPublisherTest {
             dir.resolve(it.filename).apply(Path::createFile)
         }
 
-        DefaultPublisher(dir, curseforge).publish(metadata)
+        DefaultPublisher(dir, curseforge, modrinth).publish(metadata)
 
         fun MockKMatcherScope.verifyArtifacts() = match<List<ReleaseArtifact>> { artifacts ->
             artifacts.map { it.artifact } == metadataArtifacts
         }
 
         coVerify { curseforge.publishRelease(metadata, verifyArtifacts()) }
+        coVerify { modrinth.publishRelease(metadata, verifyArtifacts()) }
     }
 
     @Test
     fun `fails if artifact missing`(): Unit = runTest {
         val curseforge = mockk<CurseForgePlatform>(relaxUnitFun = true)
+        val modrinth = mockk<ModrinthPlatform>(relaxUnitFun = true)
 
         val dir = createTestDir()
         val metadata = testMetadata(versions = testVersions)
-        val publisher = DefaultPublisher(dir, curseforge)
+        val publisher = DefaultPublisher(dir, curseforge, modrinth)
 
         val ex = shouldThrowExactly<IllegalArgumentException> {
             publisher.publish(metadata)

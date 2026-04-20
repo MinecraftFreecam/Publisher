@@ -9,6 +9,10 @@ import java.security.MessageDigest
 import kotlin.io.path.inputStream
 import kotlin.io.path.name
 
+private const val SHA_256 = "SHA-256"
+private const val SHA_512 = "SHA-512"
+private const val BUFFER_SIZE = 0x2000
+
 data class ReleaseArtifact(
     val displayName: String,
     val version: String,
@@ -28,17 +32,33 @@ data class ReleaseArtifact(
         artifact.toFile().length()
     }
 
-    val sha256: ByteArray by lazy {
-        val digest = MessageDigest.getInstance("SHA-256")
-        artifact.inputStream().use { input ->
-            val buffer = ByteArray(0x2000)
-            generateSequence { input.read(buffer) }
-                .takeWhile { it > -1 }
-                .forEach { len ->
-                    digest.update(buffer, 0, len)
-                }
+    val sha256: ByteArray
+        get() = hashes[SHA_256]!!
+
+    val sha512: ByteArray
+        get() = hashes[SHA_512]!!
+
+    private val hashes: Map<String, ByteArray> by lazy {
+        sequenceOf(
+            SHA_256,
+            SHA_512,
+        ).associateWith {
+            MessageDigest.getInstance(it)
+        }.also { digestMap ->
+            val digests = digestMap.values
+            artifact.inputStream().use { input ->
+                val buffer = ByteArray(BUFFER_SIZE)
+                generateSequence { input.read(buffer) }
+                    .takeWhile { it > -1 }
+                    .forEach { len ->
+                        digests.forEach {
+                            it.update(buffer, 0, len)
+                        }
+                    }
+            }
+        }.mapValues { (_, digest) ->
+            digest.digest()
         }
-        digest.digest()
     }
 }
 

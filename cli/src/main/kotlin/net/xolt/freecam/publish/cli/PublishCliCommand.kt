@@ -15,6 +15,7 @@ import net.xolt.freecam.model.ReleaseMetadata
 import net.xolt.freecam.publish.PublisherFactory
 import net.xolt.freecam.publish.logging.*
 import net.xolt.freecam.publish.model.CurseForgeConfig
+import net.xolt.freecam.publish.model.ModrinthConfig
 import java.nio.file.Path
 import kotlin.io.path.inputStream
 
@@ -42,6 +43,7 @@ internal class PublishCliCommand(
             dryRun = dryRun,
             artifactsDir = artifactsDir,
             curseforgeConfig = curseforge,
+            modrinthConfig = modrinth,
         )
     }
 
@@ -67,6 +69,8 @@ internal class PublishCliCommand(
         .help("Perform a dry run without making any actual API calls")
 
     val curseforge: CurseForgeConfig by CurseForgeOptionGroup { metadata }
+
+    val modrinth: ModrinthConfig by ModrinthOptionGroup(userAgentVersion = version) { metadata }
 
     private val verbosity by VerbosityOptionGroup()
     val logLevel: LogLevel get() = verbosity.level
