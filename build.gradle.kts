@@ -22,6 +22,7 @@ dependencies {
     implementation(libs.kotlin.coroutines)
     testImplementation(libs.kotlin.test)
     testImplementation(testFixtures(project(":api")))
+    testImplementation(testFixtures(project(":core")))
     testImplementation(libs.kotest.assertions)
     testImplementation(libs.kotlin.coroutines.test)
     testImplementation(libs.mockk)

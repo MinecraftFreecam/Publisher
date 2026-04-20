@@ -14,7 +14,6 @@ dependencies {
     implementation(libs.modrinth)
     implementation(libs.gson)
     implementation(libs.kotlin.coroutines)
-    testImplementation(testFixtures(project(":api")))
     testImplementation(testFixtures(project(":core")))
     testImplementation(libs.kotlin.test)
     testImplementation(libs.kotest.assertions)

@@ -5,6 +5,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToStream
 import net.xolt.freecam.model.*
 import java.nio.file.Path
+import kotlin.io.path.createTempFile
 import kotlin.io.path.outputStream
 
 object MetadataFixtures {
@@ -53,7 +54,8 @@ object MetadataFixtures {
 
 @OptIn(ExperimentalSerializationApi::class)
 fun ReleaseMetadata.toTestFile(): Path =
-    createTestFile().also {
+    createTempFile().also {
+        it.toFile().deleteOnExit()
         it.outputStream().use { out ->
             Json.encodeToStream(this, out)
         }
