@@ -19,8 +19,8 @@ defaults:
     shell: bash
 
 jobs:
-  api:
-    name: API
+  schema:
+    name: Schema API
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -37,13 +37,13 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
 
       - name: Build and test API
-        run: ./gradlew :api:build
+        run: ./gradlew :schema:build
 
       - name: Upload jars
         uses: actions/upload-artifact@v7
         with:
-          name: api-jars
-          path: api/build/libs/*.jar
+          name: schema-jars
+          path: schema/build/libs/*.jar
           if-no-files-found: error
 
   publisher:
@@ -66,8 +66,8 @@ jobs:
       - name: Test app
         run: |
           ./gradlew :check \
-            --exclude-task :api:test \
-            --exclude-task :api:check
+            --exclude-task :schema:test \
+            --exclude-task :schema:check
 
       - name: Build distributable app
         run: ./gradlew :distTar
@@ -83,7 +83,7 @@ jobs:
     name: Publish
     uses: ./.github/workflows/publish.yaml
     needs:
-      - api
+      - schema
       - publisher
     permissions:
       contents: write

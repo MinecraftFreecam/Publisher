@@ -28,11 +28,11 @@ dependencyResolutionManagement {
 }
 
 include(
-    "api",
     "core",
     "cli",
     "curseforge",
     "modrinth",
+    "schema",
 )
 
 rootProject.name = "freecam-publish"

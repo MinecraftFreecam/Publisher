@@ -4,7 +4,7 @@ plugins {
     `java-test-fixtures`
 }
 
-version = property("api_version").toString()
+version = property("schema_version").toString()
 group = property("version").toString()
 
 dependencies {
