@@ -15,7 +15,7 @@ val DefaultPublisherFactory = PublisherFactory { dryRun, artifactsDir ->
 
 data class DefaultPublisher(
     val artifactsDir: Path,
-) : AutoCloseable, Publisher {
+) : Publisher {
 
     override suspend fun publish(metadata: ReleaseMetadata) {
         val artifacts = metadata.resolveArtifacts(artifactsDir).apply {
@@ -31,6 +31,4 @@ data class DefaultPublisher(
                 throw IllegalArgumentException("The following artifacts were not found:\n$files")
             }
     }
-
-    override fun close() { }
 }

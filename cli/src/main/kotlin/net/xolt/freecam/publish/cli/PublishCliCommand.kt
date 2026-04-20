@@ -37,7 +37,7 @@ internal class PublishCliCommand(
     }
 
     private val publisher by lazy {
-        publisherFactory.create(
+        publisherFactory(
             dryRun = dryRun,
             artifactsDir = artifactsDir,
         )
@@ -83,6 +83,6 @@ internal class PublishCliCommand(
             }
         }
 
-        publisher.use { it.publish(metadata) }
+        publisher(metadata)
     }
 }

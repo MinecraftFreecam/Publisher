@@ -74,10 +74,7 @@ class PublishCliCommandTest {
         dryPublisher shouldBe true
         actualDir shouldBe dir.absolute()
         result.statusCode shouldBe 0
-        coVerifySequence {
-            publisher.publish(metadata)
-            publisher.close()
-        }
+        coVerifySequence { publisher(metadata) }
         confirmVerified(publisher)
     }
 
@@ -108,10 +105,7 @@ class PublishCliCommandTest {
         cmd.dryRun shouldBe false
         dryPublisher shouldBe false
         actualDir shouldBe dir.absolute()
-        coVerifySequence {
-            publisher.publish(metadata)
-            publisher.close()
-        }
+        coVerifySequence { publisher(metadata) }
         confirmVerified(publisher)
     }
 
