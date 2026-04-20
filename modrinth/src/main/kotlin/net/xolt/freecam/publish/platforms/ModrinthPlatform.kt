@@ -31,7 +31,7 @@ internal class DefaultModrinthPlatform(
         config: ModrinthConfig,
         logger: Logger = createLogger(dryRun),
     ) : this(
-        client = ModrinthClient(dryRun, config),
+        client = ModrinthClient(dryRun, config, logger),
         logger = logger,
     )
 
