@@ -1,5 +1,7 @@
 <p align="center" width="100%"><img src=".idea/icon.svg" width="128" height="128" alt="Freecam Publisher icon"></p>
 
+[![GitHub Release](https://img.shields.io/github/v/release/MinecraftFreecam/Publisher)](https://github.com/MinecraftFreecam/Publisher/releases/latest)
+
 # Freecam Publisher
 
 An internal tool for publishing [Freecam] releases.
