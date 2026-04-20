@@ -11,11 +11,11 @@ kotlin {
 }
 
 dependencies {
-    api(project(":api"))
+    api(project(":schema"))
     implementation(libs.slf4j.api)
     testImplementation(libs.kotlin.test)
     testImplementation(libs.kotest.assertions)
-    testImplementation(testFixtures(project(":api")))
+    testImplementation(testFixtures(project(":schema")))
 }
 
 tasks.test {
