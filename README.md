@@ -4,8 +4,8 @@
 
 An internal tool for publishing [Freecam] releases.
 
-Uses [CurseforgeUpload4j] to upload releases to CurseForge and [Modrinth4j] to upload releases to Modrinth.
+Uses [CurseUpload4J] to upload releases to CurseForge and [Modrinth4J] to upload releases to Modrinth.
 
 [Freecam]: https://github.com/MinecraftFreecam/Freecam
-[CurseforgeUpload4j]]: https://github.com/firstdarkdev/CurseUpload4J
-[Modrinth4j]: https://github.com/masecla22/Modrinth4J
+[CurseUpload4J]: https://github.com/firstdarkdev/CurseUpload4J
+[Modrinth4J]: https://github.com/masecla22/Modrinth4J
