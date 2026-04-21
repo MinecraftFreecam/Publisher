@@ -1,0 +1,119 @@
+name: Action
+
+on:
+  pull_request:
+    paths:
+      - action.yaml
+      - gradle.properties
+
+# Group workflow runs by ref.
+# New runs cancel any in progress.
+concurrency:
+  group: test-actions-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test-setup-action:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-slim
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout action
+        uses: actions/checkout@v6
+        with:
+          path: setup-publisher
+          sparse-checkout: |
+            action.yaml
+            gradle.properties
+          sparse-checkout-cone-mode: false
+
+      - name: Run setup-publisher
+        id: setup
+        uses: ./setup-publisher
+
+      - name: Check outputs
+        env:
+          exe_path: ${{ steps.setup.outputs.path }}
+          version: ${{ steps.setup.outputs.version }}
+        run: |
+          echo "::notice::version: $version"
+          echo "::notice::exe: $exe_path"
+
+      - name: Check installed (powershell)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          expected: ${{ steps.setup.outputs.path }}
+        run: |
+          $actual = Get-Command freecam-publish.bat -CommandType Application -ErrorAction SilentlyContinue
+          if ($null -eq $actual) {
+            Write-Error "Expected freecam-publish.bat to be in PATH, but it was not found"
+            exit 1
+          }
+
+          if ($actual.Source -ne $env:expected) {
+            Write-Error "Expected ${env:expected} to be in PATH, but got $($actual.Source)"
+            exit 1
+          }
+
+      - name: Check installed (bash)
+        if: runner.os != 'Windows'
+        env:
+          expected: ${{ steps.setup.outputs.path }}
+        run: |
+          actual=$(command -v freecam-publish)
+          [ "$actual" = "$expected" ] || {
+            echo "::error::Expected $expected to be in PATH, but got $actual"
+            exit 1
+          }
+
+      - name: Install Java
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: temurin
+
+      - name: Check version (powershell)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          version: ${{ steps.setup.outputs.version }}
+        run: |
+          $output = & freecam-publish --version
+          if ($output -like "*${env:version}*") {
+            Write-Host "Successfully managed to find '${env:version}' in the --version output"
+          } else {
+            Write-Error "Could not find '${env:version}' in the --version output. Output was: $output"
+            exit 1
+          }
+
+      - name: Check version (bash)
+        env:
+          version: ${{ steps.setup.outputs.version }}
+        run: |
+          output=$(freecam-publish --version)
+          if [[ "$output" = *"$version"* ]]; then
+            echo "Successfully managed to find '$version' in the --version output"
+          else
+            echo "::error::Could not find '$version' in the --version output" >&2
+            echo "$output" >&2
+            exit 1
+          fi
