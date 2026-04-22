@@ -2,12 +2,15 @@ package net.xolt.freecam.publish.platforms
 
 import me.hypherionmc.curseupload.constants.CurseReleaseType
 import net.xolt.freecam.model.ReleaseType
+import net.xolt.freecam.publish.logging.Logger
 import net.xolt.freecam.publish.model.ReleaseArtifact
 
 private val JAVA_VERSION_PATTERN = "^java_(\\d+)$".toRegex()
 private val LEGACY_SNAPSHOT_PATTERN = "^[A-Za-z0-9]+$".toRegex()
 private val PRE_RELEASE_PATTERN = "^(.*)-(pre|rc)-\\d+$".toRegex()
 private val SNAPSHOT_PATTERN = "^(.*)-snapshot-\\d+$".toRegex()
+
+internal fun Logger.curseApiMessage(msg: String) = info { msg }
 
 internal fun ReleaseType.toCurseForge(): CurseReleaseType = when (this) {
     ReleaseType.RELEASE -> CurseReleaseType.RELEASE
