@@ -8,7 +8,7 @@ coroutines = "1.10.2"
 clikt = "5.1.0"
 kotest = "6.1.2"
 mockk = "1.14.9"
-curse4j = "1.0.13"
+curse4j = "1.1.0"
 modrinth4j = "da95ff1ea9130d1d0729ac58b58f758170a7abc0" # 2024-01-05
 
 [libraries]
