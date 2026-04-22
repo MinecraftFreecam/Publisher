@@ -8,7 +8,6 @@ import me.hypherionmc.curseupload.constants.GameType
 import me.hypherionmc.curseupload.requests.CurseArtifact
 import net.xolt.freecam.model.Relationship
 import net.xolt.freecam.publish.logging.Logger
-import net.xolt.freecam.publish.logging.slf4j
 import net.xolt.freecam.publish.model.CurseForgeConfig
 import net.xolt.freecam.publish.model.ReleaseArtifact
 import java.io.File
@@ -25,7 +24,7 @@ internal class CurseForgeClient(
         logger: Logger,
     ) : this(
         projectId = config.projectId.toLong(),
-        api = CurseUploadApi(config.token, logger.slf4j).apply {
+        api = CurseUploadApi(config.token, logger::curseApiMessage).apply {
             // Instructs api.upload() to print instead of upload
             isDebug = dryRun
             gameType = GameType.MINECRAFT
