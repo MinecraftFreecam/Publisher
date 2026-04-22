@@ -29,6 +29,11 @@ dependencies {
 }
 
 tasks {
+    distTar {
+        compression = Compression.GZIP
+        archiveExtension = "tar.gz"
+    }
+
     jar {
         from("LICENSE")
     }
