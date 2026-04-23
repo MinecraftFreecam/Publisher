@@ -24,6 +24,8 @@ runs:
     - name: Create working directory
       shell: python
       run: |
+        "Create working directory"
+
         from tempfile import mkdtemp
         from os import environ
 
@@ -34,6 +36,8 @@ runs:
       id: version
       shell: python
       run: |
+        "Read version from gradle.properties"
+
         import os
         from pathlib import Path
 
@@ -123,6 +127,8 @@ runs:
       env:
         size: ${{ steps.asset.outputs.size }}
       run: |
+        "Verify size"
+
         import os
 
         name = os.environ["ARCHIVE_NAME"]
@@ -144,6 +150,8 @@ runs:
       env:
         digest: ${{ steps.asset.outputs.digest }}
       run: |
+        "Verify checksum"
+
         from hashlib import sha256
         from os import environ
         from pathlib import Path
@@ -170,6 +178,8 @@ runs:
     - name: Extract archive
       shell: python
       run: |
+        "Extract archive"
+
         import tarfile
         from os import environ
 
@@ -180,6 +190,8 @@ runs:
       id: resolve
       shell: python
       run: |
+        "Resolve executable path"
+
         import os
         from pathlib import Path
 
@@ -203,6 +215,8 @@ runs:
       env:
         EXE_PATH: ${{ steps.resolve.outputs.path }}
       run: |
+        "Install to PATH"
+
         from os import environ
         from pathlib import Path
 
