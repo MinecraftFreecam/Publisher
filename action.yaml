@@ -93,13 +93,18 @@ runs:
 
           const { owner, repo } = context.repo
 
-          const release = await github.rest.repos.getReleaseByTag({
+          core.info(`Resolving release assets for v${version}`)
+          const { data: release } = await github.rest.repos.getReleaseByTag({
             owner,
             repo,
             tag: `v${version}`,
           })
+          if (!release) {
+            core.setFailed(`Release not found: v${version}`)
+            return
+          }
 
-          const asset = release.data.assets.find(a => a.name === expectedName)
+          const asset = release.assets.find(a => a.name === expectedName)
           if (!asset) {
             core.setFailed(`Asset not found: ${expectedName}`)
             return
