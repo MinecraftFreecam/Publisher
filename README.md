@@ -25,6 +25,12 @@ dependencies {
 
 You can pin a specific version by replacing `-SNAPSHOT` with a git tag or commit, see [JitPack].
 
+### Setup Action
+
+A GitHub Action is available to install the Publisher CLI.
+It installs the CLI from the corresponding release assets.
+See [`action.yaml`](./action.yaml) for details.
+
 [Freecam]: https://github.com/MinecraftFreecam/Freecam
 [CurseUpload4J]: https://github.com/firstdarkdev/CurseUpload4J
 [Modrinth4J]: https://github.com/masecla22/Modrinth4J

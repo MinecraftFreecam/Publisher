@@ -1,0 +1,211 @@
+name: setup-publisher
+description: Install Freecam Publisher
+
+inputs:
+  install_to_path:
+    description: Add the executables to the PATH
+    required: true
+    default: 'true'
+  github_token:
+    description: GitHub token (defaults to GITHUB_TOKEN)
+    required: false
+
+outputs:
+  version:
+    description: The version that was installed
+    value: ${{ steps.version.outputs.version }}
+  path:
+    description: Path to the Publisher executable
+    value: ${{ steps.resolve.outputs.path }}
+
+runs:
+  using: composite
+  steps:
+    - name: Create working directory
+      shell: python
+      run: |
+        from tempfile import mkdtemp
+        from os import environ
+
+        with open(environ["GITHUB_ENV"], "a") as env:
+            print(f"WORK_DIR={mkdtemp()}", file=env)
+
+    - name: Read version from gradle.properties
+      id: version
+      shell: python
+      run: |
+        import os
+        from pathlib import Path
+
+        def find_file() -> Path:
+            action_path = os.environ.get("GITHUB_ACTION_PATH")
+            if action_path:
+                p = Path(action_path) / "gradle.properties"
+                if p.is_file():
+                    return p
+
+            p = Path("gradle.properties")
+            if p.is_file():
+                return p
+
+            raise SystemExit("::error::gradle.properties not found")
+
+        def read_version(path: Path) -> str:
+            with path.open() as f:
+                for raw in f:
+                    line = raw.strip()
+                    if not line or line.startswith(("#", "!")):
+                        continue
+
+                    key, sep, value = line.partition("=")
+                    if sep and key.strip() == "version":
+                        return value.lstrip(" ")
+
+            raise SystemExit(f"::error::Failed to parse version")
+
+        file = find_file()
+        version = read_version(file)
+
+        with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+            print(f"version={version}", file=out)
+
+        with open(os.environ["GITHUB_ENV"], "a") as env:
+            print(f"PUBLISHER_VERSION={version}", file=env)
+
+    - name: Download release asset
+      id: asset
+      uses: actions/github-script@v9
+      with:
+        github-token: ${{ inputs.github_token || github.token }}
+        script: |
+          const fs = require("fs")
+          const path = require("path")
+          const { pipeline } = require("stream/promises")
+          const { Readable } = require("stream")
+
+          const version = process.env.PUBLISHER_VERSION
+          const workDir = process.env.WORK_DIR
+          const expectedName = `freecam-publish-${version}.tar.gz`
+
+          const { owner, repo } = context.repo
+
+          const release = await github.rest.repos.getReleaseByTag({
+            owner,
+            repo,
+            tag: `v${version}`,
+          })
+
+          const asset = release.data.assets.find(a => a.name === expectedName)
+          if (!asset) {
+            core.setFailed(`Asset not found: ${expectedName}`)
+            return
+          }
+
+          const archivePath = path.join(workDir, asset.name)
+
+          core.info(`Downloading ${asset.name} → ${archivePath}`)
+          const { data: stream } = await github.request({
+            method: "GET",
+            url: asset.url,
+            headers: { accept: "application/octet-stream" },
+            request: { parseSuccessResponseBody: false },
+          })
+
+          await pipeline(Readable.fromWeb(stream), fs.createWriteStream(archivePath))
+
+          core.exportVariable("ARCHIVE_NAME", asset.name)
+          core.exportVariable("ARCHIVE_PATH", archivePath)
+          core.setOutput("size", asset.size)
+          if (asset.digest) core.setOutput("digest", asset.digest)
+
+    - name: Verify size
+      shell: python
+      env:
+        size: ${{ steps.asset.outputs.size }}
+      run: |
+        import os
+
+        name = os.environ["ARCHIVE_NAME"]
+        expected = int(os.environ["size"])
+        actual = os.path.getsize(os.environ["ARCHIVE_PATH"])
+
+        if actual != expected:
+          raise SystemExit(
+              f"::error::Size mismatch for {name}"
+              "%0A"
+              f"Expected: {expected}"
+              "%0A"
+              f"Actual:   {actual}"
+          )
+
+    - name: Verify checksum
+      if: startsWith(steps.asset.outputs.digest, 'sha256:')
+      shell: python
+      env:
+        digest: ${{ steps.asset.outputs.digest }}
+      run: |
+        from hashlib import sha256
+        from os import environ
+        from pathlib import Path
+
+        name = environ["ARCHIVE_NAME"]
+        expected = environ["digest"].removeprefix("sha256:")
+
+        digest = sha256()
+        with open(environ["ARCHIVE_PATH"], "rb") as f:
+          for chunk in iter(lambda: f.read(8192), b""):
+            digest.update(chunk)
+
+        actual = digest.hexdigest()
+
+        if actual != expected:
+          raise SystemExit(
+              f"::error::SHA-256 hash mismatch for {name}"
+              "%0A"
+              f"Expected: {expected}"
+              "%0A"
+              f"Actual:   {actual}"
+          )
+
+    - name: Extract archive
+      shell: python
+      run: |
+        import tarfile
+        from os import environ
+
+        with tarfile.open(environ["ARCHIVE_PATH"], "r:gz") as tar:
+            tar.extractall(environ["WORK_DIR"], filter="tar")
+
+    - name: Resolve executable path
+      id: resolve
+      shell: python
+      run: |
+        import os
+        from pathlib import Path
+
+        version = os.environ["PUBLISHER_VERSION"]
+        root = Path(os.environ["WORK_DIR"]) / f"freecam-publish-{version}"
+
+        if os.environ["RUNNER_OS"] == "Windows":
+            exe = root / "bin" / "freecam-publish.bat"
+        else:
+            exe = root / "bin" / "freecam-publish"
+
+        if not exe.is_file():
+            raise SystemExit(f"::error::Executable not found at {exe}")
+
+        with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+            print(f"path={exe.resolve()}", file=out)
+
+    - name: Install to PATH
+      if: inputs.install_to_path == 'true'
+      shell: python
+      env:
+        EXE_PATH: ${{ steps.resolve.outputs.path }}
+      run: |
+        from os import environ
+        from pathlib import Path
+
+        exe = Path(environ["EXE_PATH"])
+        with open(environ["GITHUB_PATH"], "a") as gh_path:
+          print(exe.parent, file=gh_path)
