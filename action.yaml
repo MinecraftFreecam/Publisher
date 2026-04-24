@@ -78,97 +78,51 @@ runs:
 
     - name: Download release asset
       id: asset
-      uses: actions/github-script@v9
-      with:
-        github-token: ${{ inputs.github_token || github.token }}
-        script: |
-          const fs = require("fs")
-          const path = require("path")
-          const { pipeline } = require("stream/promises")
-          const { Readable } = require("stream")
-
-          const version = process.env.PUBLISHER_VERSION
-          const workDir = process.env.WORK_DIR
-          const expectedName = `freecam-publish-${version}.tar.gz`
-
-          const { owner, repo } = context.repo
-
-          core.info(`Resolving release assets for v${version}`)
-          const { data: release } = await github.rest.repos.getReleaseByTag({
-            owner,
-            repo,
-            tag: `v${version}`,
-          })
-          if (!release) {
-            core.setFailed(`Release not found: v${version}`)
-            return
-          }
-
-          const asset = release.assets.find(a => a.name === expectedName)
-          if (!asset) {
-            core.setFailed(`Asset not found: ${expectedName}`)
-            return
-          }
-
-          const archivePath = path.join(workDir, asset.name)
-
-          core.info(`Downloading ${asset.name} → ${archivePath}`)
-          const { data: stream } = await github.request({
-            method: "GET",
-            url: asset.url,
-            headers: { accept: "application/octet-stream" },
-            request: { parseSuccessResponseBody: false },
-          })
-
-          await pipeline(Readable.fromWeb(stream), fs.createWriteStream(archivePath))
-
-          core.exportVariable("ARCHIVE_NAME", asset.name)
-          core.exportVariable("ARCHIVE_PATH", archivePath)
-          core.setOutput("size", asset.size)
-          if (asset.digest) core.setOutput("digest", asset.digest)
-
-    - name: Verify size
       shell: python
-      env:
-        size: ${{ steps.asset.outputs.size }}
       run: |
-        "Verify size"
-
-        import os
-
-        name = os.environ["ARCHIVE_NAME"]
-        expected = int(os.environ["size"])
-        actual = os.path.getsize(os.environ["ARCHIVE_PATH"])
-
-        if actual != expected:
-          raise SystemExit(
-              f"::error::Size mismatch for {name}"
-              "%0A"
-              f"Expected: {expected}"
-              "%0A"
-              f"Actual:   {actual}"
-          )
-
-    - name: Verify checksum
-      if: startsWith(steps.asset.outputs.digest, 'sha256:')
-      shell: python
-      env:
-        digest: ${{ steps.asset.outputs.digest }}
-      run: |
-        "Verify checksum"
+        "Download release asset"
 
         from hashlib import sha256
         from os import environ
         from pathlib import Path
+        from urllib.request import urlopen
+        from urllib.error import HTTPError, URLError
 
-        name = environ["ARCHIVE_NAME"]
-        expected = environ["digest"].removeprefix("sha256:")
+        version = environ["PUBLISHER_VERSION"]
+        name = f"freecam-publish-{version}.tar.gz"
+        sha_name = f"{name}.sha256"
 
+        assets_url = f"https://github.com/MinecraftFreecam/Publisher/releases/download/v{version}"
+        archive_url = f"{assets_url}/{name}"
+        archive_path = Path(environ["WORK_DIR"]) / name
+        sha_url = f"{assets_url}/{sha_name}"
+
+        # Fetch expected checksum
+        print(f"Downloading SHA-256 checksum: {sha_url}")
+        try:
+          with urlopen(sha_url, timeout=30) as r:
+            expected = r.read().decode().strip().split()[0]
+        except HTTPError as e:
+          if e.code == 404:
+            raise SystemExit(f"::error::SHA-256 checksum not found: {sha_url}")
+          raise SystemExit(f"::error::Failed to download {sha_url} (HTTP {e.code})")
+        except URLError as e:
+          raise SystemExit(f"::error::Failed to download {sha_url}: {e.reason}")
+
+        # Compute actual checksum while downloading archive
+        print(f"Downloading archive: {archive_url}")
         digest = sha256()
-        with open(environ["ARCHIVE_PATH"], "rb") as f:
-          for chunk in iter(lambda: f.read(8192), b""):
-            digest.update(chunk)
-
+        try:
+          with urlopen(archive_url, timeout=30) as r, open(archive_path, "wb") as f:
+            for chunk in iter(lambda: r.read(8192), b""):
+              digest.update(chunk)
+              f.write(chunk)
+        except HTTPError as e:
+          if e.code == 404:
+            raise SystemExit(f"::error::Release asset not found: {archive_url}")
+          raise SystemExit(f"::error::Failed to download {archive_url} (HTTP {e.code})")
+        except URLError as e:
+          raise SystemExit(f"::error::Failed to download {archive_url}: {e.reason}")
         actual = digest.hexdigest()
 
         if actual != expected:
@@ -178,7 +132,13 @@ runs:
               f"Expected: {expected}"
               "%0A"
               f"Actual:   {actual}"
+              "%0A"
+              f"URL: {archive_url}"
           )
+
+        with open(environ["GITHUB_ENV"], "a") as env:
+            print(f"ARCHIVE_NAME={name}", file=env)
+            print(f"ARCHIVE_PATH={archive_path}", file=env)
 
     - name: Extract archive
       shell: python
