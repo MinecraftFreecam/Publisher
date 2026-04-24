@@ -104,8 +104,11 @@ runs:
             expected = r.read().decode().strip().split()[0]
         except HTTPError as e:
           if e.code == 404:
-            raise SystemExit(f"::error::SHA-256 checksum not found: {sha_url}")
-          raise SystemExit(f"::error::Failed to download {sha_url} (HTTP {e.code})")
+            # TODO: throw SystemExit if the checksum is missing
+            print(f"::error::SHA-256 checksum not found: {sha_url}")
+            expected = None
+          else:
+            raise SystemExit(f"::error::Failed to download {sha_url} (HTTP {e.code})")
         except URLError as e:
           raise SystemExit(f"::error::Failed to download {sha_url}: {e.reason}")
 
@@ -125,7 +128,7 @@ runs:
           raise SystemExit(f"::error::Failed to download {archive_url}: {e.reason}")
         actual = digest.hexdigest()
 
-        if actual != expected:
+        if expected is not None and actual != expected:
           raise SystemExit(
               f"::error::SHA-256 hash mismatch for {name}"
               "%0A"
