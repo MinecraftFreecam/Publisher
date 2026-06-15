@@ -7,6 +7,10 @@ plugins {
 version = property("schema_version").toString()
 group = property("version").toString()
 
+kotlin {
+    jvmToolchain(21)
+}
+
 dependencies {
     implementation(libs.kotlin.semver)
     implementation(libs.kotlin.serialization.json)
