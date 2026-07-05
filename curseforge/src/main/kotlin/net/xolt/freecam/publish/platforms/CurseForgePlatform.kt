@@ -1,5 +1,6 @@
 package net.xolt.freecam.publish.platforms
 
+import me.hypherionmc.curseupload.errors.InvalidCurseVersionException
 import net.xolt.freecam.model.ReleaseMetadata
 import net.xolt.freecam.publish.logging.Logger
 import net.xolt.freecam.publish.model.CurseForgeConfig
@@ -32,8 +33,16 @@ internal class DefaultCurseForgePlatform(
 
     override suspend fun publishRelease(metadata: ReleaseMetadata, artifacts: List<ReleaseArtifact>) {
         artifacts.forEach { spec ->
-            logger.info { "publishing artifact ${spec.name}" }
-            client.uploadFile(spec)
+            try {
+                logger.info { "publishing artifact ${spec.name}" }
+                client.uploadFile(spec)
+            } catch (e: InvalidCurseVersionException) {
+                if (!e.isSnapshotOnly) throw e
+
+                // Workaround CurseForge's flaky snapshot version support
+                logger.warn { "retrying ${spec.name} without invalid snapshot versions: ${e.invalidVersions}" }
+                client.uploadFile(spec, excludeVersions = e.invalidVersions.toSet())
+            }
         }
     }
 }
