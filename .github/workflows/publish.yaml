@@ -68,13 +68,13 @@ jobs:
 
     steps:
       - name: Checkout CI files
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           sparse-checkout: .github/actions
           sparse-checkout-cone-mode: false
 
       - name: Checkout version file
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ inputs.ref || github.ref }}
           sparse-checkout: gradle.properties
