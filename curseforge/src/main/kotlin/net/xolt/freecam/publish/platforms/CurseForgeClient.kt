@@ -32,7 +32,10 @@ internal class CurseForgeClient(
         logger,
     )
 
-     suspend fun uploadFile(spec: ReleaseArtifact) = uploadFile(spec.artifact.toFile()) {
+     suspend fun uploadFile(
+         spec: ReleaseArtifact,
+         excludeVersions: Set<String> = emptySet(),
+     ) = uploadFile(spec.artifact.toFile()) {
          displayName(spec.displayName)
          releaseType(spec.versionType.toCurseForge())
 
@@ -45,7 +48,7 @@ internal class CurseForgeClient(
              spec.loaders,
              spec.curseForgeEnvironments,
              spec.curseForgeJavaVersions,
-             spec.curseForgeMinecraftVersions,
+             spec.curseForgeMinecraftVersions.filterNot(excludeVersions::contains),
          ).flatten().forEach(::addGameVersion)
 
          spec.relationships.forEach { (slug, _, type) ->

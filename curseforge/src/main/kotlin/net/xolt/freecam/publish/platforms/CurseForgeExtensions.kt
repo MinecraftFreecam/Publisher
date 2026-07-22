@@ -1,6 +1,7 @@
 package net.xolt.freecam.publish.platforms
 
 import me.hypherionmc.curseupload.constants.CurseReleaseType
+import me.hypherionmc.curseupload.errors.InvalidCurseVersionException
 import net.xolt.freecam.model.ReleaseType
 import net.xolt.freecam.publish.logging.Logger
 import net.xolt.freecam.publish.model.ReleaseArtifact
@@ -44,3 +45,12 @@ internal val ReleaseArtifact.curseForgeMinecraftVersions: List<String>
                 ?.let { "${it.groupValues[1]}-snapshot" }
                 ?: version
         }
+
+/**
+ * True when all [invalidVersions][InvalidCurseVersionException.invalidVersions]
+ * are snapshot versions.
+ *
+ * Note: curseforge snapshot versions are suffixed with `"-snapshot"`.
+ */
+internal val InvalidCurseVersionException.isSnapshotOnly
+    get() = invalidVersions.all { it.endsWith("-snapshot") }
