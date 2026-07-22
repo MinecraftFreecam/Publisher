@@ -21,7 +21,7 @@ fun ReleaseType.Companion.fromVersion(version: String, strict: Boolean = false):
     Version.parse(version, strict).toReleaseType()
 
 /** Extract a [ReleaseType] from a [Version]. */
-internal fun Version.toReleaseType(): ReleaseType =
+fun Version.toReleaseType(): ReleaseType =
     preRelease
         ?.substringBefore('.')
         ?.toReleaseType()
