@@ -6,8 +6,9 @@ import net.xolt.freecam.publish.model.ModrinthConfig
 import java.nio.file.Path
 
 fun interface Publisher {
-    suspend fun publish(metadata: ReleaseMetadata)
-    suspend operator fun invoke(metadata: ReleaseMetadata) = publish(metadata)
+    suspend fun publish(releaseNotes: String, metadata: ReleaseMetadata)
+    suspend operator fun invoke(releaseNotes: String, metadata: ReleaseMetadata)
+        = publish(releaseNotes, metadata)
 }
 
 fun interface PublisherFactory {

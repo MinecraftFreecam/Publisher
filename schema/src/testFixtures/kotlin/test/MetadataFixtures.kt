@@ -13,7 +13,6 @@ object MetadataFixtures {
         modVersion: String = "0.1.0",
         releaseType: ReleaseType = ReleaseType.RELEASE,
         displayName: String = "Fake Release",
-        changelog: String = "Changelog",
         githubTag: String = "v0.1.0",
         modrinthId: String = "id",
         curseforgeId: ULong = 1234UL,
@@ -22,7 +21,6 @@ object MetadataFixtures {
         modVersion = modVersion,
         releaseType = releaseType,
         displayName = displayName,
-        changelog = changelog,
         platforms = Platforms(
             github = Platforms.Github(githubTag),
             modrinth = Platforms.Modrinth(modrinthId),

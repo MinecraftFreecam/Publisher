@@ -16,13 +16,17 @@ class ResolveArtifactsTest {
     fun `resolves to expected artifacts`() {
         val artifactsDir = createTestDir()
         val filenames = listOf("a", "b", "c")
+        val releaseNotes = "release notes"
         val metadata = testMetadata(
             versions = filenames.map { testProjectMetadata(filename = it) },
         )
 
-        val artifacts: List<ReleaseArtifact> = metadata.resolveArtifacts(artifactsDir)
+        val artifacts: List<ReleaseArtifact> = artifactsDir.resolveReleaseArtifacts(releaseNotes, metadata)
 
         artifacts.map { it.name } shouldContainExactly filenames
+        artifacts.map { it.releaseNotes } shouldContainExactly List(filenames.size) {
+            releaseNotes
+        }
         artifacts.map { it.artifact } shouldContainExactly filenames.map {
             artifactsDir.resolve(it)
         }
@@ -31,21 +35,21 @@ class ResolveArtifactsTest {
     @Test
     fun `retains top-level metadata`() {
         val artifactsDir = Path("")
+        val releaseNotes = "release notes"
         val metadata = testMetadata(
             modVersion = "1.2.3",
             releaseType = ReleaseType.ALPHA,
-            changelog = "Changelog",
             versions = List(10) { testProjectMetadata() },
         )
 
-        val artifacts: List<ReleaseArtifact> = metadata.resolveArtifacts(artifactsDir)
+        val artifacts: List<ReleaseArtifact> = artifactsDir.resolveReleaseArtifacts(releaseNotes, metadata)
 
         assertSoftly(artifacts) {
             size shouldBe 10
             forEach {
                 it.version shouldBe "1.2.3"
                 it.versionType shouldBe ReleaseType.ALPHA
-                it.changelog shouldBe "Changelog"
+                it.releaseNotes shouldBe releaseNotes
             }
         }
     }

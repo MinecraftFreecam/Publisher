@@ -44,7 +44,7 @@ internal class ModrinthClient(
     suspend fun uploadVersion(spec: ReleaseArtifact) = uploadVersion {
         projectId(projectId)
         name(spec.displayName)
-        changelog(spec.changelog)
+        changelog(spec.releaseNotes)
         versionNumber(spec.version)
         versionType(spec.versionType.toModrinth())
         loaders(spec.loaders.toList())
