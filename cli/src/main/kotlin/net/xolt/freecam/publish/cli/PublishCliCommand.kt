@@ -18,6 +18,7 @@ import net.xolt.freecam.publish.model.CurseForgeConfig
 import net.xolt.freecam.publish.model.ModrinthConfig
 import java.nio.file.Path
 import kotlin.io.path.inputStream
+import kotlin.io.path.readText
 
 internal class PublishCliCommand(
     version: String = "0.0.1",
@@ -47,6 +48,10 @@ internal class PublishCliCommand(
         )
     }
 
+    val releaseNotes: String by lazy {
+        releaseNotesPath.readText()
+    }
+
     @OptIn(ExperimentalSerializationApi::class)
     val metadata: ReleaseMetadata by lazy {
         metadataPath.inputStream().use { input ->
@@ -57,6 +62,13 @@ internal class PublishCliCommand(
     val artifactsDir: Path by argument("artifacts-dir")
         .path(mustExist = true, mustBeReadable = true, canBeFile = false, canBeDir = true)
         .help("Directory containing the release artifacts")
+
+    val releaseNotesPath: Path by option("--release-notes")
+        .path(mustExist = true, mustBeReadable = true, canBeFile = true, canBeDir = false)
+        .help("Release notes file")
+        .defaultLazy(defaultForHelp = "[artifacts-dir]/release-notes.md") {
+            artifactsDir.resolve("release-notes.md")
+        }
 
     val metadataPath: Path by option("--metadata")
         .path(mustExist = true, mustBeReadable = true, canBeFile = true, canBeDir = false)
@@ -91,6 +103,6 @@ internal class PublishCliCommand(
             }
         }
 
-        publisher(metadata)
+        publisher(releaseNotes, metadata)
     }
 }

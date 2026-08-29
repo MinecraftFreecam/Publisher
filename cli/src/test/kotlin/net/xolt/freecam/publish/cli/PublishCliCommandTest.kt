@@ -49,6 +49,7 @@ class PublishCliCommandTest {
 
     @Test
     fun `dry-run uses dry publisher`() = runTest {
+        val releaseNotes = "release notes"
         val metadata = testMetadata()
         val dir = createTestDir()
         var dryPublisher: Boolean? = null
@@ -66,8 +67,8 @@ class PublishCliCommandTest {
             "--dry-run",
             "--curseforge-token", "token",
             "--modrinth-token", "token",
-            "--metadata",
-            metadata.toTestFile().absolutePathString(),
+            "--release-notes", releaseNotes.toTestFile().absolutePathString(),
+            "--metadata", metadata.toTestFile().absolutePathString(),
             dir.absolutePathString(),
         ))
 
@@ -76,12 +77,13 @@ class PublishCliCommandTest {
         dryPublisher shouldBe true
         actualDir shouldBe dir.absolute()
         result.statusCode shouldBe 0
-        coVerifySequence { publisher(metadata) }
+        coVerifySequence { publisher(releaseNotes, metadata) }
         confirmVerified(publisher)
     }
 
     @Test
     fun `non-dry-run uses 'real' publisher`() = runTest {
+        val releaseNotes = "release notes"
         val metadata = testMetadata()
         var dryPublisher: Boolean? = null
         var actualDir: Path? = null
@@ -100,8 +102,8 @@ class PublishCliCommandTest {
         val result = cmd.test(listOf(
             "--curseforge-token", "token",
             "--modrinth-token", "token",
-            "--metadata",
-            metadata.toTestFile().absolutePathString(),
+            "--release-notes", releaseNotes.toTestFile().absolutePathString(),
+            "--metadata", metadata.toTestFile().absolutePathString(),
             dir.absolutePathString(),
         ))
 
@@ -109,7 +111,7 @@ class PublishCliCommandTest {
         cmd.dryRun shouldBe false
         dryPublisher shouldBe false
         actualDir shouldBe dir.absolute()
-        coVerifySequence { publisher(metadata) }
+        coVerifySequence { publisher(releaseNotes, metadata) }
         confirmVerified(publisher)
     }
 
@@ -121,8 +123,8 @@ class PublishCliCommandTest {
 
         val cmd = testCommand()
         val result = cmd.test(listOf(
-            "--metadata",
-            metadata.toTestFile().absolutePathString(),
+            "--release-notes", createTestFile().absolutePathString(),
+            "--metadata", metadata.toTestFile().absolutePathString(),
             dir.absolutePathString(),
         ))
 
@@ -138,8 +140,8 @@ class PublishCliCommandTest {
         val cmd = testCommand()
 
         val result = cmd.test(listOf(
-            "--metadata",
-            metadata.toTestFile().absolutePathString(),
+            "--release-notes", createTestFile().absolutePathString(),
+            "--metadata", metadata.toTestFile().absolutePathString(),
             file.absolutePathString(),
         ))
 

@@ -39,7 +39,7 @@ internal class CurseForgeClient(
          displayName(spec.displayName)
          releaseType(spec.versionType.toCurseForge())
 
-         spec.changelog.takeIf { it.isNotBlank() }?.let {
+         spec.releaseNotes.takeIf { it.isNotBlank() }?.let {
              changelog(it)
              changelogType(CurseChangelogType.MARKDOWN)
          }

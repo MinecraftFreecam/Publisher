@@ -17,7 +17,7 @@ data class ReleaseArtifact(
     val displayName: String,
     val version: String,
     val versionType: ReleaseType,
-    val changelog: String,
+    val releaseNotes: String,
     val environments: Set<Environment>,
     val loaders: Set<String>,
     val gameVersion: String,
@@ -62,23 +62,25 @@ data class ReleaseArtifact(
     }
 }
 
-fun ReleaseMetadata.resolveArtifacts(artifactsDir: Path): List<ReleaseArtifact>
-    = versions
+fun Path.resolveReleaseArtifacts(
+    releaseNotes: String,
+    metadata: ReleaseMetadata,
+) = metadata.versions
     .asSequence()
     .sorted()
     .map {
         ReleaseArtifact(
             displayName = it.displayName,
-            version = modVersion,
-            versionType = releaseType,
-            changelog = changelog,
+            version = metadata.modVersion,
+            versionType = metadata.releaseType,
+            releaseNotes = releaseNotes,
             environments = it.environments.toSet(),
             loaders = setOf(it.loader),
             gameVersion = it.minecraft,
             gameVersions = it.gameVersions.toSet(),
             javaVersions = it.javaVersions.toSet(),
             relationships = it.relationships.toSet(),
-            artifact = artifactsDir.resolve(it.filename),
+            artifact = resolve(it.filename),
         )
     }
     .toList()

@@ -2,9 +2,8 @@ package net.xolt.freecam.publish
 
 import net.xolt.freecam.model.ReleaseMetadata
 import net.xolt.freecam.publish.model.ReleaseArtifact
-import net.xolt.freecam.publish.model.resolveArtifacts
+import net.xolt.freecam.publish.model.resolveReleaseArtifacts
 import net.xolt.freecam.publish.platforms.CurseForgePlatform
-import net.xolt.freecam.publish.platforms.create
 import net.xolt.freecam.publish.platforms.ModrinthPlatform
 import net.xolt.freecam.publish.platforms.create
 import java.nio.file.Path
@@ -25,10 +24,9 @@ data class DefaultPublisher(
     val modrinth: ModrinthPlatform,
 ) : Publisher {
 
-    override suspend fun publish(metadata: ReleaseMetadata) {
-        val artifacts = metadata.resolveArtifacts(artifactsDir).apply {
-            verifyExists()
-        }
+    override suspend fun publish(releaseNotes: String, metadata: ReleaseMetadata) {
+        val artifacts = artifactsDir.resolveReleaseArtifacts(releaseNotes, metadata)
+        artifacts.verifyExists()
         curseforge.publishRelease(metadata, artifacts)
         modrinth.publishRelease(metadata, artifacts)
     }

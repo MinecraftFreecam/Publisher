@@ -30,15 +30,17 @@ class DefaultPublisherTest {
         val modrinth = mockk<ModrinthPlatform>(relaxUnitFun = true)
 
         val dir = createTestDir()
+        val releaseNotes = "release notes"
         val metadata = testMetadata(versions = testVersions)
         val metadataArtifacts = metadata.versions.map {
             dir.resolve(it.filename).apply(Path::createFile)
         }
 
-        DefaultPublisher(dir, curseforge, modrinth).publish(metadata)
+        DefaultPublisher(dir, curseforge, modrinth).publish(releaseNotes, metadata)
 
         fun MockKMatcherScope.verifyArtifacts() = match<List<ReleaseArtifact>> { artifacts ->
             artifacts.map { it.artifact } == metadataArtifacts
+                && artifacts.map { it.releaseNotes } == List(metadata.versions.size) { releaseNotes }
         }
 
         coVerify { curseforge.publishRelease(metadata, verifyArtifacts()) }
@@ -51,11 +53,12 @@ class DefaultPublisherTest {
         val modrinth = mockk<ModrinthPlatform>(relaxUnitFun = true)
 
         val dir = createTestDir()
+        val releaseNotes = "release notes"
         val metadata = testMetadata(versions = testVersions)
         val publisher = DefaultPublisher(dir, curseforge, modrinth)
 
         val ex = shouldThrowExactly<IllegalArgumentException> {
-            publisher.publish(metadata)
+            publisher.publish(releaseNotes, metadata)
         }
 
         ex.message shouldContainOnlyOnce "artifacts were not found"

@@ -10,7 +10,6 @@ data class ReleaseMetadata(
     @SerialName("mod_version") val modVersion: String,
     @SerialName("display_name") val displayName: String,
     @SerialName("release_type") val releaseType: ReleaseType,
-    val changelog: String,
     val platforms: Platforms,
     val versions: List<ProjectReleaseMetadata>,
 )
